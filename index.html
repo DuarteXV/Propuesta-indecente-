@@ -3,386 +3,231 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Propuesta Indecente — Romeo Santos</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Player</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --green: #1DB954; --bg: #0d0d0d; --s2: #282828;
-  --white: #FFFFFF; --gray: #A7A7A7; --gray2: #404040;
-}
-html, body { height: 100%; background: var(--bg); font-family: 'Inter', sans-serif; color: var(--white); overflow: hidden; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d0d0d;color:#fff;font-family:Inter,sans-serif;overflow:hidden}
 
-.ambient {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background: radial-gradient(ellipse 90% 50% at 50% -5%, rgba(155,27,42,0.5) 0%, transparent 62%);
-}
-.app {
-  position: relative; z-index: 1;
-  width: 100%; max-width: 430px; height: 100vh;
-  margin: 0 auto; display: flex; flex-direction: column; overflow: hidden;
-}
+.app{max-width:430px;height:100vh;margin:auto;display:flex;flex-direction:column}
 
-/* Topbar */
-.topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 50px 24px 10px; flex-shrink: 0;
+.disc-wrap{display:flex;justify-content:center;padding:30px 0}
+.disc{
+  width:180px;height:180px;border-radius:50%;
+  background:conic-gradient(#111,#222,#111);
+  animation:spin 6s linear infinite paused;
 }
-.topbar svg { cursor: pointer; opacity: .7; transition: opacity .2s; }
-.topbar svg:hover { opacity: 1; }
-.topbar-label { font-size: .68rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+.disc.playing{animation-play-state:running}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* Disc */
-.disc-wrap { display: flex; justify-content: center; padding: 6px 0 14px; flex-shrink: 0; }
-.disc-outer {
-  width: 195px; height: 195px; border-radius: 50%; position: relative;
-  filter: drop-shadow(0 10px 36px rgba(0,0,0,.8)) drop-shadow(0 0 28px rgba(155,27,42,.38));
-}
-.disc-vinyl {
-  width: 100%; height: 100%; border-radius: 50%;
-  background: conic-gradient(#1c1c1c 0deg,#252525 8deg,#111 18deg,#1e1e1e 30deg,#161616 50deg,#242424 65deg,#101010 85deg,#1c1c1c 110deg,#151515 140deg,#222 170deg,#111 200deg,#1d1d1d 230deg,#161616 260deg,#232323 290deg,#101010 320deg,#1c1c1c 360deg);
-  position: absolute; inset: 0; border-radius: 50%;
-  animation: spin 7s linear infinite paused;
-}
-.disc-vinyl.spinning { animation-play-state: running; }
-.disc-vinyl::after {
-  content: ''; position: absolute; inset: 0; border-radius: 50%;
-  background: repeating-radial-gradient(circle at 50% 50%, transparent 24px,rgba(255,255,255,.022) 25px,transparent 27px,rgba(255,255,255,.016) 30px,transparent 31px,rgba(255,255,255,.022) 34px,transparent 35px);
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.disc-label {
-  position: absolute; inset: 15%; border-radius: 50%; overflow: hidden;
-  background: linear-gradient(145deg,#9B1B2A 0%,#6B0F1A 55%,#3D0A10 100%);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-}
-.disc-monogram { font-size: 1.9rem; font-weight: 800; color: rgba(255,255,255,.9); line-height: 1; }
-.disc-sub { font-size: .37rem; letter-spacing: .26em; color: rgba(255,255,255,.45); text-transform: uppercase; }
-.disc-hole {
-  position: absolute; width: 13%; height: 13%; left: 43.5%; top: 43.5%;
-  border-radius: 50%; background: radial-gradient(circle,#080808 60%,#181818 100%); z-index: 2;
+.info{text-align:center}
+.info h2{font-size:1.2rem}
+.info p{color:#aaa;font-size:.8rem}
+
+.bar{padding:20px}
+.track{height:4px;background:#333;border-radius:2px;cursor:pointer}
+.fill{height:100%;background:#fff;width:0}
+
+.controls{display:flex;justify-content:center;padding:20px}
+button{
+  width:60px;height:60px;border-radius:50%;
+  border:none;background:#fff;cursor:pointer
 }
 
-/* Song info */
-.song-info { display: flex; align-items: center; justify-content: space-between; padding: 0 24px 12px; flex-shrink: 0; }
-.song-name { font-size: 1.15rem; font-weight: 700; }
-.song-artist { font-size: .82rem; color: var(--gray); margin-top: 2px; }
-.heart-btn { background: none; border: none; cursor: pointer; color: var(--green); transition: transform .15s; }
-.heart-btn:hover { transform: scale(1.15); }
+.panel{flex:1;overflow:hidden;position:relative}
+.scroll{transition:transform .5s cubic-bezier(.22,.61,.36,1)}
 
-/* Progress */
-.prog-wrap { padding: 0 24px; flex-shrink: 0; }
-.prog-track { width: 100%; height: 4px; background: var(--gray2); border-radius: 2px; cursor: pointer; position: relative; }
-.prog-fill {
-  height: 100%; width: 0%; background: var(--white); border-radius: 2px;
-  pointer-events: none; transition: width .22s linear; position: relative;
+.lyric-line{
+  font-size:1.2rem;
+  color:rgba(255,255,255,.2);
+  margin:16px 0;
+  text-align:center;
+  transition:.25s;
 }
-.prog-fill::after {
-  content: ''; position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
-  width: 12px; height: 12px; border-radius: 50%; background: var(--white); opacity: 0; transition: opacity .15s;
-}
-.prog-track:hover .prog-fill { background: var(--green); }
-.prog-track:hover .prog-fill::after { opacity: 1; }
-.time-row { display: flex; justify-content: space-between; font-size: .63rem; color: var(--gray); margin-top: 6px; }
-
-/* Controls */
-.controls { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px 10px; flex-shrink: 0; }
-.c-side { background:none;border:none;cursor:pointer;color:var(--gray);padding:8px;transition:color .15s,transform .15s; }
-.c-side:hover { color:var(--white);transform:scale(1.08); }
-.c-skip { background:none;border:none;cursor:pointer;color:var(--white);padding:8px;opacity:.75;transition:opacity .15s,transform .15s; }
-.c-skip:hover { opacity:1;transform:scale(1.08); }
-.play-btn {
-  width: 52px; height: 52px; border-radius: 50%;
-  background: var(--white); border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; color:#000;
-  box-shadow: 0 6px 20px rgba(0,0,0,.5); transition: transform .15s,background .15s;
-}
-.play-btn:hover { transform: scale(1.06); background: #e8e8e8; }
-.play-btn:active { transform: scale(.96); }
-
-/* Lyrics panel */
-.lyrics-panel { flex: 1; overflow: hidden; position: relative; min-height: 0; }
-.lyrics-panel::before,.lyrics-panel::after { content:'';position:absolute;left:0;right:0;z-index:2;pointer-events:none; }
-.lyrics-panel::before { top:0;height:52px;background:linear-gradient(to bottom,var(--bg),transparent); }
-.lyrics-panel::after  { bottom:0;height:72px;background:linear-gradient(to top,var(--bg),transparent); }
-
-.lscroll {
-  padding: 24px 28px 60px;
-  transition: transform .5s cubic-bezier(.25,.46,.45,.94);
-  will-change: transform;
+.lyric-line.active{
+  color:#fff;
+  font-size:1.5rem;
+  text-shadow:0 0 12px rgba(255,255,255,.3);
 }
 
-.lyric-line {
-  font-size: 1.4rem; font-weight: 800; line-height: 1.35; margin-bottom: 16px;
-  color: rgba(255,255,255,.22); cursor: pointer; user-select: none;
-  transition: color .38s, font-size .28s;
+.lyric-line .w{
+  transition: color .15s linear;
 }
-.lyric-line:hover { color: rgba(255,255,255,.4); }
-.lyric-line.near-prev { color: rgba(255,255,255,.4); }
-.lyric-line.near-next { color: rgba(255,255,255,.3); }
-.lyric-line.active { font-size: 1.52rem; color: rgba(255,255,255,.25); }
-.lyric-line.active .w { transition: color .16s; color: rgba(255,255,255,.25); }
-.lyric-line.active .w.lit { color: var(--white); }
-.lyric-line.meta {
-  font-size: .7rem !important; font-weight: 500;
-  color: rgba(255,255,255,.18) !important; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 22px;
-}
-.lyric-line.meta.active { color: rgba(255,255,255,.55) !important; font-size: .76rem !important; }
-
-/* Volume */
-.vol-row { display: flex; align-items: center; gap: 10px; padding: 4px 24px 26px; flex-shrink: 0; }
-.vol-icon { color: var(--gray); flex-shrink: 0; }
-input[type=range] {
-  -webkit-appearance:none; flex:1; height:4px; background:var(--gray2); border-radius:2px; cursor:pointer; outline:none;
-}
-input[type=range]::-webkit-slider-thumb { -webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--white); }
-input[type=range]:hover { background:#606060; }
 </style>
 </head>
 <body>
-<div class="ambient"></div>
+
 <div class="app">
 
-  <div class="topbar">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>
-    <span class="topbar-label">Reproduciendo</span>
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-  </div>
+<div class="disc-wrap">
+  <div class="disc" id="disc"></div>
+</div>
 
-  <div class="disc-wrap">
-    <div class="disc-outer">
-      <div class="disc-vinyl" id="disc"></div>
-      <div class="disc-label">
-        <div class="disc-monogram">RS</div>
-        <div class="disc-sub">Fórmula Vol. 2</div>
-      </div>
-      <div class="disc-hole"></div>
-    </div>
-  </div>
+<div class="info">
+  <h2>Propuesta Indecente</h2>
+  <p>Romeo Santos</p>
+</div>
 
-  <div class="song-info">
-    <div>
-      <div class="song-name">Propuesta Indecente</div>
-      <div class="song-artist">Romeo Santos</div>
-    </div>
-    <button class="heart-btn">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-    </button>
-  </div>
-
-  <div class="prog-wrap">
-    <div class="prog-track" id="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
-    <div class="time-row"><span id="t-cur">0:00</span><span id="t-dur">4:09</span></div>
-  </div>
-
-  <div class="controls">
-    <button class="c-side">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
-    </button>
-    <button class="c-skip">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2" fill="none"/></svg>
-    </button>
-    <button class="play-btn" id="btn-play">
-      <svg id="i-play" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      <svg id="i-pause" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-    </button>
-    <button class="c-skip">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" fill="none"/></svg>
-    </button>
-    <button class="c-side">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-    </button>
-  </div>
-
-  <div class="lyrics-panel">
-    <div class="lscroll" id="lscroll"></div>
-  </div>
-
-  <div class="vol-row">
-    <svg class="vol-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/></svg>
-    <input type="range" id="vol" min="0" max="1" step="0.01" value="1">
-    <svg class="vol-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+<div class="bar">
+  <div class="track" id="track">
+    <div class="fill" id="fill"></div>
   </div>
 </div>
 
-<audio id="audio" src="https://raw.githubusercontent.com/DuarteXV/Yotsuba-MD-Premium/main/uploads/daa2998f4bc2990e.mp3" preload="metadata"></audio>
+<div class="controls">
+  <button id="play">▶</button>
+</div>
+
+<div class="panel">
+  <div class="scroll" id="scroll"></div>
+</div>
+
+</div>
+
+<audio id="audio" src="https://raw.githubusercontent.com/DuarteXV/Yotsuba-MD-Premium/main/uploads/daa2998f4bc2990e.mp3"></audio>
 
 <script>
-// ── Letra completa con timestamps calibrados ─────────────────────────────────
 const lyrics = [
-  { t: 0,   m: "♪ Intro ♪",                                         meta: true  },
-  { t: 6,   m: "Hola, me llaman Romeo"                                           },
-  { t: 9,   m: "Es un placer conocerla"                                          },
-  { t: 12,  m: "Qué bien te ves, te adelanto"                                    },
-  { t: 15,  m: "No me importa quién sea él"                                      },
-  { t: 18,  m: "Dígame usted, si ha hecho algo travieso alguna vez"              },
-  { t: 22,  m: "Una aventura es más divertida si huele a peligro"               },
-  { t: 27,  m: "Y si te invito a una copa y me acerco a tu boca"                },
-  { t: 32,  m: "Si te robo un besito, a ver, te enojas conmigo"                 },
-  { t: 37,  m: "Qué dirías si esta noche te seduzco en mi coche"                },
-  { t: 42,  m: "Que se empañen los vidrios si la regla es que goces"            },
-  { t: 47,  m: "Si te falto el respeto y luego culpo al alcohol"                },
-  { t: 52,  m: "Si levanto tu falda, ¿me darías el derecho"                     },
-  { t: 56,  m: "A medir tu sensatez, poner en juego tu cuerpo?"                 },
-  { t: 60,  m: "Si te parece prudente esta propuesta indecente"                 },
-  { t: 65,  m: "A ver, a ver"                                                    },
-  { t: 67,  m: "Permíteme apreciar tu desnudez"                                 },
-  { t: 71,  m: "Relájate"                                                        },
-  { t: 73,  m: "Que este martini calmará tu timidez"                            },
-  { t: 77,  m: "Una aventura es más divertida si huele a peligro"               },
-  { t: 82,  m: "Y si te invito a una copa y me acerco a tu boca"                },
-  { t: 87,  m: "Si te robo un besito, a ver, te enojas conmigo"                 },
-  { t: 92,  m: "Qué dirías si esta noche te seduzco en mi coche"                },
-  { t: 97,  m: "Que se empañen los vidrios si la regla es que goces"            },
-  { t: 102, m: "Si te falto el respeto y luego culpo al alcohol"                },
-  { t: 107, m: "Si levanto tu falda, ¿me darías el derecho"                     },
-  { t: 111, m: "A medir tu sensatez, poner en juego tu cuerpo?"                 },
-  { t: 115, m: "Si te parece prudente esta propuesta indecente"                 },
-  { t: 120, m: "A ver, a ver"                                                    },
-  { t: 122, m: "Permíteme apreciar tu desnudez"                                 },
-  { t: 126, m: "Relájate"                                                        },
-  { t: 128, m: "Que este martini calmará tu timidez"                            },
-  { t: 132, m: "Una aventura es más divertida si huele a peligro"               },
-  { t: 137, m: "♪ Solo de guitarra ♪",                              meta: true  },
-  { t: 162, m: "I'm back...",                                        meta: true  },
-  { t: 165, m: "It feels good to be king",                           meta: true  },
-  { t: 168, m: "Hey... listen",                                      meta: true  },
-  { t: 171, m: "I know what you like",                               meta: true  },
-  { t: 175, m: "Y si te invito a una copa y me acerco a tu boca"                },
-  { t: 180, m: "Si te robo un besito, a ver, te enojas conmigo"                 },
-  { t: 185, m: "Qué dirías si esta noche te seduzco en mi coche"                },
-  { t: 190, m: "Que se empañen los vidrios si la regla es que goces"            },
-  { t: 195, m: "Si te falto el respeto y luego culpo al alcohol"                },
-  { t: 200, m: "Si levanto tu falda, ¿me darías el derecho"                     },
-  { t: 204, m: "A medir tu sensatez, poner en juego tu cuerpo?"                 },
-  { t: 208, m: "Si te parece prudente esta propuesta indecente"                 },
-  { t: 213, m: "A ver, a ver"                                                    },
-  { t: 215, m: "Permíteme apreciar tu desnudez"                                 },
-  { t: 219, m: "Relájate"                                                        },
-  { t: 221, m: "Que este martini calmará tu timidez"                            },
-  { t: 225, m: "Una aventura es más divertida si huele a peligro"               },
-  { t: 230, m: "How about if you and I, me and you"                             },
-  { t: 233, m: "Bailamos bachata"                                                },
-  { t: 236, m: "Y luego you and I, me and you"                                  },
-  { t: 239, m: "Terminamo' en la cama"                                           },
-  { t: 242, m: "How about if you and I, me and you"                             },
-  { t: 245, m: "Bailamos bachata, ay bailamos bachata"                           },
-  { t: 249, m: "Y luego you and I, me and you"                                  },
-  { t: 252, m: "Terminamos en la cama"                                           },
-  { t: 256, m: "♪ Outro ♪",                                         meta: true  },
+{t:0,m:"♪ Intro ♪",meta:true},
+{t:6,m:"Hola me llaman Romeo"},
+{t:9,m:"Es un placer conocerla"},
+{t:12,m:"Que bien te ves"},
+{t:15,m:"No me importa quien sea el"},
+{t:18,m:"Dime si has hecho algo travieso"},
+{t:22,m:"Una aventura es mas divertida"},
+{t:27,m:"Si te invito a una copa"},
+{t:32,m:"Si te robo un besito"},
+{t:37,m:"Que dirias esta noche"},
+{t:42,m:"Si te seduzco en mi coche"},
+{t:47,m:"Si te falto el respeto"},
+{t:52,m:"Si levanto tu falda"},
+{t:56,m:"Si te parece prudente"},
+{t:60,m:"Esta propuesta indecente"},
+{t:65,m:"Permiteme apreciar"},
+{t:70,m:"Relajate"},
+{t:75,m:"Una aventura es mas divertida"},
+{t:80,m:"Si te invito a una copa"},
+{t:85,m:"Si te robo un besito"},
+{t:90,m:"Que dirias esta noche"},
+{t:95,m:"Si te seduzco en mi coche"},
+{t:100,m:"Si te falto el respeto"},
+{t:105,m:"Si levanto tu falda"},
+{t:110,m:"Si te parece prudente"},
+{t:115,m:"Esta propuesta indecente"},
+{t:120,m:"Permiteme apreciar"},
+{t:125,m:"Relajate"},
+{t:130,m:"♪ Solo ♪",meta:true},
+{t:165,m:"I'm back",meta:true},
+{t:170,m:"It feels good",meta:true},
+{t:175,m:"Si te invito a una copa"},
+{t:180,m:"Si te robo un besito"},
+{t:185,m:"Que dirias esta noche"},
+{t:190,m:"Si te seduzco en mi coche"},
+{t:195,m:"Si te falto el respeto"},
+{t:200,m:"Si levanto tu falda"},
+{t:205,m:"Si te parece prudente"},
+{t:210,m:"Esta propuesta indecente"},
+{t:215,m:"Permiteme apreciar"},
+{t:220,m:"Relajate"},
+{t:225,m:"How about you and I"},
+{t:230,m:"Bailamos bachata"},
+{t:235,m:"Terminamos en la cama"},
+{t:240,m:"Bailamos bachata"},
+{t:245,m:"Terminamos en la cama"},
+{t:250,m:"♪ Outro ♪",meta:true}
 ];
 
-// ── DOM ──────────────────────────────────────────────────────────────────────
-const audio   = document.getElementById('audio');
-const disc    = document.getElementById('disc');
-const lscroll = document.getElementById('lscroll');
-const progTrack = document.getElementById('prog-track');
-const progFill  = document.getElementById('prog-fill');
-const tCur = document.getElementById('t-cur');
-const tDur = document.getElementById('t-dur');
-const btnPlay = document.getElementById('btn-play');
-const iPlay   = document.getElementById('i-play');
-const iPause  = document.getElementById('i-pause');
-const panel   = document.querySelector('.lyrics-panel');
+const audio=document.getElementById('audio');
+const scroll=document.getElementById('scroll');
+const panel=document.querySelector('.panel');
+const fill=document.getElementById('fill');
+const disc=document.getElementById('disc');
 
-// ── Build lines ───────────────────────────────────────────────────────────────
-const spacer = document.createElement('div');
-spacer.style.height = '50px';
-lscroll.appendChild(spacer);
+let els=[],last=-1;
 
-const els = lyrics.map((l, i) => {
-  const div = document.createElement('div');
-  div.className = 'lyric-line' + (l.meta ? ' meta' : '');
-  div.id = `L${i}`;
-  if (!l.meta) {
-    l.m.split(' ').forEach((word, wi, arr) => {
-      const sp = document.createElement('span');
-      sp.className = 'w';
-      sp.textContent = word + (wi < arr.length - 1 ? ' ' : '');
-      div.appendChild(sp);
+// construir letras
+lyrics.forEach(l=>{
+  const div=document.createElement('div');
+  div.className='lyric-line'+(l.meta?' meta':'');
+  
+  if(!l.meta){
+    l.m.split(' ').forEach((w,i,a)=>{
+      const s=document.createElement('span');
+      s.className='w';
+      s.textContent=w+(i<a.length-1?' ':'');
+      div.appendChild(s);
     });
-  } else {
-    div.textContent = l.m;
+  }else{
+    div.textContent=l.m;
   }
-  div.addEventListener('click', () => {
-    audio.currentTime = l.t;
-    if (audio.paused) togglePlay();
-  });
-  lscroll.appendChild(div);
-  return div;
+
+  scroll.appendChild(div);
+  els.push(div);
 });
 
-// ── State ─────────────────────────────────────────────────────────────────────
-let lastIdx = -1;
+// pintar palabras
+function paint(i,t){
+  if(lyrics[i].meta)return;
 
-const fmt = s => {
-  s = Math.floor(s || 0);
-  return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+  const words=els[i].querySelectorAll('.w');
+  const start=lyrics[i].t;
+  const end=lyrics[i+1]?lyrics[i+1].t:start+4;
+
+  const p=Math.min(1,(t-start)/(end-start));
+  const n=Math.floor(p*words.length);
+
+  words.forEach((w,idx)=>{
+    w.style.color=idx<=n?"#fff":"rgba(255,255,255,.25)";
+  });
+}
+
+// update
+function update(){
+  const t=audio.currentTime;
+
+  let i=lyrics.findIndex((l,idx)=>{
+    const next=lyrics[idx+1];
+    return t>=l.t && (!next||t<next.t);
+  });
+
+  if(i===-1)return;
+
+  paint(i,t);
+
+  if(i!==last){
+    last=i;
+
+    els.forEach((el,idx)=>{
+      el.classList.toggle('active',idx===i);
+    });
+
+    const el=els[i];
+    const offset=el.offsetTop - panel.clientHeight/2 + el.clientHeight/2;
+    scroll.style.transform=`translateY(-${offset}px)`;
+  }
+
+  fill.style.width=(t/audio.duration*100)+"%";
+}
+
+audio.addEventListener('timeupdate',update);
+
+// play
+document.getElementById('play').onclick=()=>{
+  if(audio.paused){
+    audio.play();
+    disc.classList.add('playing');
+  }else{
+    audio.pause();
+    disc.classList.remove('playing');
+  }
 };
 
-function highlightWords(idx, time) {
-  if (lyrics[idx].meta) return;
-  const words = els[idx].querySelectorAll('.w');
-  if (!words.length) return;
-  const tS = lyrics[idx].t;
-  const tE = idx + 1 < lyrics.length ? lyrics[idx+1].t : tS + 4;
-  const pct = Math.min(1, (time - tS) / Math.max(tE - tS, 0.5));
-  const lit = Math.ceil(pct * words.length);
-  words.forEach((w, i) => w.classList.toggle('lit', i < lit));
-}
+// seek
+document.getElementById('track').onclick=e=>{
+  let r=e.currentTarget.getBoundingClientRect();
+  audio.currentTime=(e.clientX-r.left)/r.width*audio.duration;
+};
+</script>
 
-function updateLyrics(time) {
-  let idx = -1;
-  for (let i = 0; i < lyrics.length; i++) {
-    if (time >= lyrics[i].t) idx = i; else break;
-  }
-  if (idx >= 0) highlightWords(idx, time);
-  if (idx === lastIdx) return;
-  lastIdx = idx;
-
-  els.forEach((el, i) => {
-    el.classList.remove('active','near-prev','near-next');
-    const d = i - idx;
-    if (d === 0)       el.classList.add('active');
-    else if (d === -1) el.classList.add('near-prev');
-    else if (d === 1)  el.classList.add('near-next');
-  });
-
-  if (idx >= 0) {
-    const pH = panel.clientHeight;
-    const lTop = els[idx].offsetTop + spacer.offsetHeight;
-    lscroll.style.transform = `translateY(${pH * 0.27 - lTop}px)`;
-  }
-}
-
-// ── Audio events ──────────────────────────────────────────────────────────────
-audio.addEventListener('timeupdate', () => {
-  const t = audio.currentTime, d = audio.duration || 260;
-  updateLyrics(t);
-  progFill.style.width = (t / d * 100) + '%';
-  tCur.textContent = fmt(t);
-});
-audio.addEventListener('loadedmetadata', () => { tDur.textContent = fmt(audio.duration); });
-
-function togglePlay() {
-  if (audio.paused) {
-    audio.play();
-    iPlay.style.display = 'none'; iPause.style.display = '';
-    disc.classList.add('spinning');
-  } else {
-    audio.pause();
-    iPlay.style.display = ''; iPause.style.display = 'none';
-    disc.classList.remove('spinning');
-  }
-}
-btnPlay.addEventListener('click', togglePlay);
-audio.addEventListener('ended', () => {
-  iPlay.style.display = ''; iPause.style.display = 'none';
-  disc.classList.remove('spinning');
-});
-
-progTrack.addEventListener('click', e => {
-  const r = progTrack.getBoundingClientRect();
-  audio.currentTime = ((e.clientX - r.left) / r.width) * (audio.duration || 260);
-});
-
-document.getElementById('vol').addEventListener('input', e => { audio.volume = +e.target.
+</body>
+</html>
