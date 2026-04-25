@@ -3,39 +3,77 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Player</title>
+<title>Player Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0d0d0d;color:#fff;font-family:Inter,sans-serif;overflow:hidden}
+body{
+  background:#0d0d0d;
+  color:#fff;
+  font-family:Inter,sans-serif;
+  overflow:hidden;
+}
 
-.app{max-width:430px;height:100vh;margin:auto;display:flex;flex-direction:column}
+/* fondo dinámico */
+.bg{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  filter:blur(80px);
+  opacity:.35;
+}
 
+/* overlay oscuro */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle,transparent 60%,rgba(0,0,0,.7));
+  pointer-events:none;
+}
+
+.app{
+  max-width:430px;
+  height:100vh;
+  margin:auto;
+  display:flex;
+  flex-direction:column;
+}
+
+/* disco */
 .disc-wrap{display:flex;justify-content:center;padding:30px 0}
 .disc{
   width:180px;height:180px;border-radius:50%;
-  background:conic-gradient(#111,#222,#111);
+  background:
+    radial-gradient(circle,#000 20%,transparent 21%),
+    repeating-radial-gradient(circle,#111 0 2px,#000 3px 4px);
+  box-shadow:0 10px 40px rgba(0,0,0,.8),0 0 30px rgba(255,255,255,.08);
   animation:spin 6s linear infinite paused;
 }
 .disc.playing{animation-play-state:running}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+/* info */
 .info{text-align:center}
 .info h2{font-size:1.2rem}
 .info p{color:#aaa;font-size:.8rem}
 
+/* barra */
 .bar{padding:20px}
 .track{height:4px;background:#333;border-radius:2px;cursor:pointer}
 .fill{height:100%;background:#fff;width:0}
 
+/* botón */
 .controls{display:flex;justify-content:center;padding:20px}
 button{
   width:60px;height:60px;border-radius:50%;
   border:none;background:#fff;cursor:pointer
 }
 
+/* letras */
 .panel{flex:1;overflow:hidden;position:relative}
-.scroll{transition:transform .5s cubic-bezier(.22,.61,.36,1)}
+.scroll{transition:transform .6s cubic-bezier(.22,.61,.36,1)}
 
 .lyric-line{
   font-size:1.2rem;
@@ -44,18 +82,22 @@ button{
   text-align:center;
   transition:.25s;
 }
+
 .lyric-line.active{
   color:#fff;
-  font-size:1.5rem;
-  text-shadow:0 0 12px rgba(255,255,255,.3);
+  font-size:1.6rem;
+  text-shadow:
+    0 0 10px rgba(255,255,255,.4),
+    0 0 25px rgba(255,255,255,.2);
 }
 
-.lyric-line .w{
-  transition: color .15s linear;
-}
+.w{transition:color .15s linear}
 </style>
 </head>
+
 <body>
+
+<div class="bg" id="bg"></div>
 
 <div class="app">
 
@@ -142,10 +184,11 @@ const scroll=document.getElementById('scroll');
 const panel=document.querySelector('.panel');
 const fill=document.getElementById('fill');
 const disc=document.getElementById('disc');
+const bg=document.getElementById('bg');
 
 let els=[],last=-1;
 
-// construir letras
+// crear letras
 lyrics.forEach(l=>{
   const div=document.createElement('div');
   div.className='lyric-line'+(l.meta?' meta':'');
@@ -165,7 +208,7 @@ lyrics.forEach(l=>{
   els.push(div);
 });
 
-// pintar palabras
+// karaoke
 function paint(i,t){
   if(lyrics[i].meta)return;
 
@@ -181,9 +224,22 @@ function paint(i,t){
   });
 }
 
+// fondo dinámico
+function updateBG(t){
+  const h1=(t*10)%360;
+  const h2=(t*20)%360;
+
+  bg.style.background=`
+    radial-gradient(circle at 30% 30%, hsl(${h1},80%,50%), transparent 60%),
+    radial-gradient(circle at 70% 70%, hsl(${h2},80%,50%), transparent 60%)
+  `;
+}
+
 // update
 function update(){
   const t=audio.currentTime;
+
+  updateBG(t);
 
   let i=lyrics.findIndex((l,idx)=>{
     const next=lyrics[idx+1];
