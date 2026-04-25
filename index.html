@@ -3,283 +3,215 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Player Pro</title>
+<title>Player Minimal</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
+
 body{
-  background:#0d0d0d;
-  color:#fff;
+  background:#090909;
   font-family:Inter,sans-serif;
-  overflow:hidden;
-}
-
-/* fondo dinámico */
-.bg{
-  position:fixed;
-  inset:0;
-  z-index:-1;
-  filter:blur(80px);
-  opacity:.35;
-}
-
-/* overlay oscuro */
-body::after{
-  content:'';
-  position:fixed;
-  inset:0;
-  background:radial-gradient(circle,transparent 60%,rgba(0,0,0,.7));
-  pointer-events:none;
-}
-
-.app{
-  max-width:430px;
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
   height:100vh;
-  margin:auto;
+}
+
+/* CONTENEDOR */
+.player{
+  width:100%;
+  max-width:380px;
+  height:92vh;
+  border-radius:24px;
+  background:#111;
+  padding:20px;
   display:flex;
   flex-direction:column;
+  gap:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
 }
 
-/* disco */
-.disc-wrap{display:flex;justify-content:center;padding:30px 0}
-.disc{
-  width:180px;height:180px;border-radius:50%;
-  background:
-    radial-gradient(circle,#000 20%,transparent 21%),
-    repeating-radial-gradient(circle,#111 0 2px,#000 3px 4px);
-  box-shadow:0 10px 40px rgba(0,0,0,.8),0 0 30px rgba(255,255,255,.08);
-  animation:spin 6s linear infinite paused;
-}
-.disc.playing{animation-play-state:running}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* info */
-.info{text-align:center}
-.info h2{font-size:1.2rem}
-.info p{color:#aaa;font-size:.8rem}
-
-/* barra */
-.bar{padding:20px}
-.track{height:4px;background:#333;border-radius:2px;cursor:pointer}
-.fill{height:100%;background:#fff;width:0}
-
-/* botón */
-.controls{display:flex;justify-content:center;padding:20px}
-button{
-  width:60px;height:60px;border-radius:50%;
-  border:none;background:#fff;cursor:pointer
-}
-
-/* letras */
-.panel{flex:1;overflow:hidden;position:relative}
-.scroll{transition:transform .6s cubic-bezier(.22,.61,.36,1)}
-
-.lyric-line{
-  font-size:1.2rem;
-  color:rgba(255,255,255,.2);
-  margin:16px 0;
+/* HEADER */
+.header{
   text-align:center;
+}
+.header h2{font-size:1rem}
+.header p{font-size:.8rem;color:#888}
+
+/* PROGRESS */
+.progress{
+  height:4px;
+  background:#333;
+  border-radius:2px;
+  cursor:pointer;
+  overflow:hidden;
+}
+.progress div{
+  height:100%;
+  width:0;
+  background:#fff;
+}
+
+/* BOTÓN */
+.controls{
+  display:flex;
+  justify-content:center;
+}
+.play{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  border:none;
+  background:#fff;
+  font-size:18px;
+  cursor:pointer;
+}
+
+/* LETRAS */
+.lyrics{
+  flex:1;
+  overflow:hidden;
+  position:relative;
+}
+.lines{
+  transition:transform .5s cubic-bezier(.22,.61,.36,1);
+}
+
+.line{
+  text-align:center;
+  font-size:1.2rem;
+  color:#555;
+  margin:14px 0;
   transition:.25s;
 }
-
-.lyric-line.active{
+.line.active{
   color:#fff;
-  font-size:1.6rem;
-  text-shadow:
-    0 0 10px rgba(255,255,255,.4),
-    0 0 25px rgba(255,255,255,.2);
+  font-size:1.5rem;
 }
-
-.w{transition:color .15s linear}
 </style>
 </head>
 
 <body>
 
-<div class="bg" id="bg"></div>
+<div class="player">
 
-<div class="app">
-
-<div class="disc-wrap">
-  <div class="disc" id="disc"></div>
-</div>
-
-<div class="info">
-  <h2>Propuesta Indecente</h2>
-  <p>Romeo Santos</p>
-</div>
-
-<div class="bar">
-  <div class="track" id="track">
-    <div class="fill" id="fill"></div>
+  <div class="header">
+    <h2>Propuesta Indecente</h2>
+    <p>Romeo Santos</p>
   </div>
-</div>
 
-<div class="controls">
-  <button id="play">▶</button>
-</div>
+  <div class="progress" id="progress">
+    <div id="bar"></div>
+  </div>
 
-<div class="panel">
-  <div class="scroll" id="scroll"></div>
-</div>
+  <div class="controls">
+    <button class="play" id="play">▶</button>
+  </div>
+
+  <div class="lyrics">
+    <div class="lines" id="lines"></div>
+  </div>
 
 </div>
 
 <audio id="audio" src="https://raw.githubusercontent.com/DuarteXV/Yotsuba-MD-Premium/main/uploads/daa2998f4bc2990e.mp3"></audio>
 
 <script>
-const lyrics = [
-{t:0,m:"♪ Intro ♪",meta:true},
+const lyrics=[
+{t:0,m:"Intro"},
 {t:6,m:"Hola me llaman Romeo"},
 {t:9,m:"Es un placer conocerla"},
 {t:12,m:"Que bien te ves"},
-{t:15,m:"No me importa quien sea el"},
-{t:18,m:"Dime si has hecho algo travieso"},
-{t:22,m:"Una aventura es mas divertida"},
-{t:27,m:"Si te invito a una copa"},
+{t:16,m:"No me importa quien sea el"},
+{t:20,m:"Una aventura es mas divertida"},
+{t:24,m:"Si huele a peligro"},
+{t:28,m:"Si te invito a una copa"},
 {t:32,m:"Si te robo un besito"},
-{t:37,m:"Que dirias esta noche"},
-{t:42,m:"Si te seduzco en mi coche"},
-{t:47,m:"Si te falto el respeto"},
-{t:52,m:"Si levanto tu falda"},
-{t:56,m:"Si te parece prudente"},
-{t:60,m:"Esta propuesta indecente"},
-{t:65,m:"Permiteme apreciar"},
-{t:70,m:"Relajate"},
-{t:75,m:"Una aventura es mas divertida"},
-{t:80,m:"Si te invito a una copa"},
-{t:85,m:"Si te robo un besito"},
-{t:90,m:"Que dirias esta noche"},
-{t:95,m:"Si te seduzco en mi coche"},
-{t:100,m:"Si te falto el respeto"},
-{t:105,m:"Si levanto tu falda"},
-{t:110,m:"Si te parece prudente"},
-{t:115,m:"Esta propuesta indecente"},
-{t:120,m:"Permiteme apreciar"},
-{t:125,m:"Relajate"},
-{t:130,m:"♪ Solo ♪",meta:true},
-{t:165,m:"I'm back",meta:true},
-{t:170,m:"It feels good",meta:true},
+{t:36,m:"Que dirias esta noche"},
+{t:40,m:"Si te seduzco en mi coche"},
+{t:45,m:"Si te falto el respeto"},
+{t:50,m:"Si levanto tu falda"},
+{t:55,m:"Esta propuesta indecente"},
+{t:60,m:"Permiteme apreciar"},
+{t:65,m:"Relajate"},
+{t:70,m:"Una aventura es mas divertida"},
+{t:75,m:"Si te invito a una copa"},
+{t:80,m:"Si te robo un besito"},
+{t:85,m:"Que dirias esta noche"},
+{t:90,m:"Si te seduzco en mi coche"},
+{t:95,m:"Si te falto el respeto"},
+{t:100,m:"Si levanto tu falda"},
+{t:105,m:"Esta propuesta indecente"},
+{t:110,m:"Permiteme apreciar"},
+{t:115,m:"Relajate"},
+{t:120,m:"Solo"},
+{t:165,m:"I'm back"},
+{t:170,m:"It feels good"},
 {t:175,m:"Si te invito a una copa"},
 {t:180,m:"Si te robo un besito"},
 {t:185,m:"Que dirias esta noche"},
 {t:190,m:"Si te seduzco en mi coche"},
 {t:195,m:"Si te falto el respeto"},
 {t:200,m:"Si levanto tu falda"},
-{t:205,m:"Si te parece prudente"},
-{t:210,m:"Esta propuesta indecente"},
-{t:215,m:"Permiteme apreciar"},
-{t:220,m:"Relajate"},
-{t:225,m:"How about you and I"},
-{t:230,m:"Bailamos bachata"},
-{t:235,m:"Terminamos en la cama"},
-{t:240,m:"Bailamos bachata"},
-{t:245,m:"Terminamos en la cama"},
-{t:250,m:"♪ Outro ♪",meta:true}
+{t:205,m:"Esta propuesta indecente"},
+{t:210,m:"Permiteme apreciar"},
+{t:215,m:"Relajate"},
+{t:220,m:"Bailamos bachata"},
+{t:225,m:"Terminamos en la cama"},
+{t:230,m:"Outro"}
 ];
 
 const audio=document.getElementById('audio');
-const scroll=document.getElementById('scroll');
-const panel=document.querySelector('.panel');
-const fill=document.getElementById('fill');
-const disc=document.getElementById('disc');
-const bg=document.getElementById('bg');
+const lines=document.getElementById('lines');
+const bar=document.getElementById('bar');
 
 let els=[],last=-1;
 
-// crear letras
+// construir letras
 lyrics.forEach(l=>{
-  const div=document.createElement('div');
-  div.className='lyric-line'+(l.meta?' meta':'');
-  
-  if(!l.meta){
-    l.m.split(' ').forEach((w,i,a)=>{
-      const s=document.createElement('span');
-      s.className='w';
-      s.textContent=w+(i<a.length-1?' ':'');
-      div.appendChild(s);
-    });
-  }else{
-    div.textContent=l.m;
-  }
-
-  scroll.appendChild(div);
-  els.push(div);
+  let d=document.createElement('div');
+  d.className='line';
+  d.textContent=l.m;
+  lines.appendChild(d);
+  els.push(d);
 });
-
-// karaoke
-function paint(i,t){
-  if(lyrics[i].meta)return;
-
-  const words=els[i].querySelectorAll('.w');
-  const start=lyrics[i].t;
-  const end=lyrics[i+1]?lyrics[i+1].t:start+4;
-
-  const p=Math.min(1,(t-start)/(end-start));
-  const n=Math.floor(p*words.length);
-
-  words.forEach((w,idx)=>{
-    w.style.color=idx<=n?"#fff":"rgba(255,255,255,.25)";
-  });
-}
-
-// fondo dinámico
-function updateBG(t){
-  const h1=(t*10)%360;
-  const h2=(t*20)%360;
-
-  bg.style.background=`
-    radial-gradient(circle at 30% 30%, hsl(${h1},80%,50%), transparent 60%),
-    radial-gradient(circle at 70% 70%, hsl(${h2},80%,50%), transparent 60%)
-  `;
-}
 
 // update
 function update(){
-  const t=audio.currentTime;
-
-  updateBG(t);
+  let t=audio.currentTime;
 
   let i=lyrics.findIndex((l,idx)=>{
-    const next=lyrics[idx+1];
-    return t>=l.t && (!next||t<next.t);
+    let n=lyrics[idx+1];
+    return t>=l.t && (!n||t<n.t);
   });
 
-  if(i===-1)return;
-
-  paint(i,t);
-
-  if(i!==last){
+  if(i!==-1 && i!==last){
     last=i;
 
     els.forEach((el,idx)=>{
       el.classList.toggle('active',idx===i);
     });
 
-    const el=els[i];
-    const offset=el.offsetTop - panel.clientHeight/2 + el.clientHeight/2;
-    scroll.style.transform=`translateY(-${offset}px)`;
+    let el=els[i];
+    let offset=el.offsetTop - 200;
+    lines.style.transform=`translateY(-${offset}px)`;
   }
 
-  fill.style.width=(t/audio.duration*100)+"%";
+  bar.style.width=(t/audio.duration*100)+"%";
 }
 
 audio.addEventListener('timeupdate',update);
 
 // play
 document.getElementById('play').onclick=()=>{
-  if(audio.paused){
-    audio.play();
-    disc.classList.add('playing');
-  }else{
-    audio.pause();
-    disc.classList.remove('playing');
-  }
+  audio.paused?audio.play():audio.pause();
 };
 
 // seek
-document.getElementById('track').onclick=e=>{
+document.getElementById('progress').onclick=e=>{
   let r=e.currentTarget.getBoundingClientRect();
   audio.currentTime=(e.clientX-r.left)/r.width*audio.duration;
 };
